@@ -39,9 +39,21 @@ class Option {
         self.sortMode = sortMode
     }
     
+    convenience init(name: String, sortMode: YelpSortMode, onValue: Bool){
+        self.init(name: name)
+        self.sortMode = sortMode
+        self.isOn = onValue
+    }
+    
     convenience init(name: String, distanceMode: RadiusMode){
         self.init(name: name)
         self.distanceMode = distanceMode
+    }
+    
+    convenience init(name: String, distanceMode: RadiusMode, onValue: Bool){
+        self.init(name: name)
+        self.distanceMode = distanceMode
+        self.isOn = onValue
     }
 }
 
@@ -67,7 +79,8 @@ class Filters {
     }
     
     private func distanceOptions() -> [Int: Option] {
-        return [ Option(name: "0.3 Miles", distanceMode: RadiusMode.nearby),
+        return [ Option(name: "Auto", distanceMode: RadiusMode.null, onValue: true),
+                 Option(name: "0.3 Miles", distanceMode: RadiusMode.nearby),
                  Option(name: "1.0 Miles", distanceMode: RadiusMode.mile),
                  Option(name: "5.0 Miles", distanceMode: RadiusMode.longmiles),
                  Option(name: "20.0 Miles", distanceMode: RadiusMode.longermiles)
@@ -75,7 +88,7 @@ class Filters {
     }
     
     private func sortByOptions() -> [Int: Option] {
-        return [ Option(name: "Best Match", sortMode: YelpSortMode.bestMatched),
+        return [ Option(name: "Best Match", sortMode: YelpSortMode.bestMatched, onValue: true),
                  Option(name: "Distance", sortMode: YelpSortMode.distance),
                  Option(name: "Highest Rated", sortMode: YelpSortMode.highestRated)
         ].indexedDictionary

@@ -23,6 +23,7 @@ enum YelpSortMode: Int {
 
 // Maps choices to meteres.
 enum RadiusMode: Int {
+    case null = 0;
     case nearby = 483;
     case mile = 1610;
     case longmiles = 8047;
@@ -74,7 +75,13 @@ class YelpClient: BDBOAuth1RequestOperationManager {
         }
         
         if radius != nil {
-            parameters["radius_filter"] = radius!.rawValue as AnyObject?
+            switch radius! {
+            case .null:
+                break
+            default:
+                parameters["radius_filter"] = radius!.rawValue as AnyObject?
+            }
+            
         }
         
         print(parameters)
