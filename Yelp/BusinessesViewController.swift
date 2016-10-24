@@ -8,11 +8,16 @@
 
 import UIKit
 
-class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate,UISearchBarDelegate {
+class BusinessesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate,UISearchBarDelegate, FiltersViewControllerDelegate {
     
-    var businesses: [Business]!
+    var businesses: [Business]! {
+        didSet {
+            self.filteredBusiness = businesses
+        }
+    }
     var filteredBusiness: [Business]!
     var searchBar: UISearchBar!
+    
     
     @IBOutlet weak var tableview: UITableView!
     
@@ -30,10 +35,9 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         searchBar.delegate = self
         navigationItem.titleView = searchBar
         
-        Business.searchWithTerm(term: "Thai", completion: { (businesses: [Business]?, error: Error?) -> Void in
+        Business.searchWithTerm(term: "Restaurants", completion: { (businesses: [Business]?, error: Error?) -> Void in
             
             self.businesses = businesses
-            self.filteredBusiness = businesses
             self.tableview.reloadData()
             if let businesses = businesses {
                 for business in businesses {
@@ -43,18 +47,6 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
             }
             }
         )
-        
-        /* Example of Yelp search with more search options specified
-         Business.searchWithTerm("Restaurants", sort: .Distance, categories: ["asianfusion", "burgers"], deals: true) { (businesses: [Business]!, error: NSError!) -> Void in
-         self.businesses = businesses
-         
-         for business in businesses {
-         print(business.name!)
-         print(business.address!)
-         }
-         }
-         */
-        
     }
     
     override func didReceiveMemoryWarning() {
@@ -62,6 +54,28 @@ class BusinessesViewController: UIViewController, UITableViewDataSource, UITable
         // Dispose of any resources that can be recreated.
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let navigationController = segue.destination as! UINavigationController
+        let filtersViewController = navigationController.topViewController as! FiltersViewController
+        
+        filtersViewController.delegate = self
+    }
+    
+    // FilterViewControllerDelegate
+    func filtersViewController(filtersViewController: FiltersViewController, didUpdateFilters filters: [String : AnyObject]) {
+        let categories = filters["categories"] as? [String]
+        let sort = filters["sortBy"] as? YelpSortMode
+        let deals = filters["isDeal"] as? Bool
+        print("Deals \(deals)")
+        let radius = filters["distance"] as? RadiusMode
+        Business.searchWithTerm(term: "Restaurants", sort: sort, categories: categories, deals: deals, radius: radius, completion: {[unowned self](businesses: [Business]?, error: Error?) -> Void in
+            self.businesses = businesses
+            self.tableview.reloadData()
+        })
+    }
+    
+    
+    // UITableViewDataSource and UITableViewDelegate
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let businesses = filteredBusiness {
             return businesses.count
